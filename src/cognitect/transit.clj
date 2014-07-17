@@ -217,25 +217,84 @@
                  m)))
            (complete [_ m] (persistent! m))))))})
 
+(deftype SizedMapBuilder [^"[Ljava.lang.Object;" array counter]
+  MapBuilder
+  (add [this _ k v]
+    (let [i (- (swap! counter + 2) 2)]
+      (aset array i k)
+      (aset array (inc i) v))
+    this)
+  (^java.util.Map complete [_ _]
+    (clojure.lang.PersistentArrayMap. array)))
+
+(deftype UnsizedMapBuilder [tmap]
+  MapBuilder
+  (add [this _ k v]
+    (assoc! tmap k v)
+    this)
+  (^java.util.Map complete [_ _] (persistent! tmap)))
+
 (defn map-builder
   "Creates a MapBuilder that makes Clojure-
-   compatible maps."
+  compatible maps."
   []
   (reify MapBuilder
-    (init [_] (transient {}))
-    (init [_ ^int size] (transient {}))
-    (add [_ m k v] (assoc! m k v))
-    (^java.util.Map complete [_ m] (persistent! m))))
+    (init [_] (UnsizedMapBuilder. (transient {})))
+    (init [_ ^int size]
+      (if (> size 8)
+        (UnsizedMapBuilder. (transient {}))
+        (SizedMapBuilder. (object-array (* 2 size)) (atom 0))))
+    (add [_ m k v] (.add ^MapBuilder m nil k v) m)
+    (^java.util.Map complete [_ m] (.complete ^MapBuilder m nil))))
+
+#_(defn map-builder
+    "Creates a MapBuilder that makes Clojure-
+   compatible maps."
+    []
+    (reify MapBuilder
+      (init [_] (transient {}))
+      (init [_ ^int size] (transient {}))
+      (add [_ m k v] (assoc! m k v))
+      (^java.util.Map complete [_ m] (persistent! m))))
+
+(deftype SizedArrayBuilder [^"[Ljava.lang.Object;" array counter]
+  ArrayBuilder
+  (add [this _ o]
+    (let [i (dec (swap! counter inc))]
+      (aset array i o)
+      this))
+  (^java.util.List complete [_ _]
+    (clojure.lang.LazilyPersistentVector/createOwning array)))
+
+(deftype UnsizedArrayBuilder [tvector]
+  ArrayBuilder
+  (add [this _ o]
+    (conj! tvector o)
+    this)
+  (^java.util.List complete [_ _]
+    (persistent! tvector)))
 
 (defn array-builder
   []
   "Creates an ArrayBuilder that makes Clojure-
    compatible lists."
   (reify ArrayBuilder
-    (init [_] (transient []))
-    (init [_ ^int size] (transient []))
-    (add [_ v item] (conj! v item))
-    (^java.util.List complete [_ v] (persistent! v))))
+    (init [_] (UnsizedArrayBuilder. (transient [])))
+    (init [_ ^int size] (if (> size 32)
+                          (UnsizedArrayBuilder. (transient []))
+                          (SizedArrayBuilder. (object-array size) (atom 0))))
+    (add [_ v item] (.add ^ArrayBuilder v v item))
+    (complete [_ v] (.complete ^ArrayBuilder v v))))
+
+#_(defn array-builder
+    []
+    "Creates an ArrayBuilder that makes Clojure-
+   compatible lists."
+    (reify ArrayBuilder
+      (init [_] (transient []))
+      (init [_ ^int size] (transient []))
+      (add [_ v item] (conj! v item))
+      (^java.util.List complete [_ v] (persistent! v))))
 
 (deftype Reader [r])
 
