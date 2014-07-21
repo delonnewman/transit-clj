@@ -66,7 +66,7 @@
 (def uris [(URI. "http://example.com")
            (URI. "ftp://example.com")
            (URI. "file:///path/to/file.txt")
-           (URI. "http://www.詹姆斯.com/")])
+           #_(URI. "http://www.詹姆斯.com/")])
 
 (def symbols ['a 'ab 'abc 'abcd 'abcde 'a1 'b2 'c3 'a_b])
 

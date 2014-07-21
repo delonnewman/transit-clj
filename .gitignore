@@ -5,6 +5,7 @@
 last-exception*
 *.jar
 *.class
+*.swp
 .DS_Store
 *~
 \#*
