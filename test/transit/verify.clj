@@ -246,12 +246,12 @@
   [proc encoding opts]
   (let [transit-exemplars (exemplar-transit encoding)]
     (filter #((:pred %) proc encoding opts)
-            [#_{:pred (constantly true)
+            [{:pred (constantly true)
               :desc "exemplar file"
               :input transit-exemplars
               :test-name :exemplar-file
               :test #(test-each proc %)}
-             #_{:pred (constantly true)
+             {:pred (constantly true)
               :desc "EDN corner case"
               :input (mapv #(edn->test-input % encoding) cc/forms)
               :test-name :corner-case-edn
