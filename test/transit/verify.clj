@@ -76,6 +76,8 @@
   (let [out (ByteArrayOutputStream.)
         w (t/writer out encoding)]
     (t/write w o)
+    (when (contains? #{:json :json-verbose} encoding)
+      (.write out (int \newline)))
     (.toByteArray out)))
 
 (defn read-transit
