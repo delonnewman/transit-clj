@@ -4,8 +4,6 @@ cd `dirname $0`/../..
 
 if [ ! -d "transit-ruby" ]; then
   git clone git@github.com:cognitect/transit-ruby.git
-  cd transit-ruby
-  bundle install
 else
   echo "transit-ruby exists"
 fi

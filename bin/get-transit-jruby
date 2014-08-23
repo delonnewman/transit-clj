@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd `dirname $0`/../..
+
+if [ ! -d "transit-jruby" ]; then
+  git clone git@github.com:cognitect/transit-ruby.git transit-jruby
+else
+  echo "transit-jruby exists"
+fi
