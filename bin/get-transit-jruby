@@ -23,7 +23,6 @@ type rvm | head -1
 if [ ! -d "transit-jruby" ]; then
   git clone git@github.com:cognitect/transit-ruby.git transit-jruby
   cd transit-jruby
-  git checkout jruby
   if [ -e "Gemfile.lock" ]; then
     rm Gemfile.lock
   fi
